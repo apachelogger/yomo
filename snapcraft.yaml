@@ -1,0 +1,42 @@
+name: yomo
+version: 0  # the version of the snap
+summary: This is my-snap's summary  # 79 char long summary
+description: This is my-snap's description  # a longer description for the snap
+confinement: devmode  # use "strict" to enforce system access only via declared interfaces
+grade: devel # use "stable" to assert the snap quality
+
+apps:
+    yomo:
+        command: kf5-launch yomo
+        plugs: [kde-frameworks-5-plug, home]
+
+plugs:
+    kde-frameworks-5-plug:
+        content: kde-frameworks-5-all
+        default-provider: kde-frameworks-5
+        interface: content
+        target: kf5/usr
+
+parts:
+    kde-frameworks-5-dev:
+        plugin: dump
+        source: /ws/kf5-snap/kde-frameworks-5_5.26_amd64.tar.xz
+        build-packages:
+            - qtbase5-dev
+            - libfam-dev
+        stage-packages: []
+        snap: [-*]
+    yomo:
+        after: [kde-frameworks-5-dev]
+        plugin: cmake
+        source: .
+        configflags:
+            - -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
+            - -DCMAKE_INSTALL_PREFIX=/usr
+            - -DCMAKE_BUILD_TYPE=Debug
+        snap:
+            - usr/bin/yomo
+            - kf5
+    environment:
+        plugin: dump
+        source: bin
